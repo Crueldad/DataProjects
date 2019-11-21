@@ -1,4 +1,4 @@
----Creating tables, delete, insert, and updating commands
+---Creating tables, delete, insert, and update commands
 
 CREATE TABLE Ian_Employee_Table(
 	BusinessEntityID INT NOT Null, 
@@ -210,7 +210,7 @@ From (select Prod_ID,
 		Where P.Prod_Subcategory In ('Accessories','Documentation');
 		Set Statistics Time Off;
 
----Using left join, right join, inner join, and creating triggers
+---Using left join, right join, inner join, creating case statement, and creating triggers
 select AdventureWorksDB.Person.Person.BusinessEntityID, PersonType, FirstName, MiddleName, LastName, EmailPromotion, 
 AdventureWorksDB.Sales.PersonCreditCard.CreditCardID
 From AdventureWorksDB.Sales.PersonCreditCard 
@@ -673,7 +673,7 @@ And EPH.RateChangeDate = (Select Max(EPH.RateChangeDate)
 From AdventureWorksDB.HumanResources.EmployeePayHistory AS EPH where PP.BusinessEntityID = EPH.BusinessEntityID)
 
 
-reate Procedure EmployeePayRange 
+Create Procedure EmployeePayRange 
 AS
 Begin
 Declare @Counter Int
@@ -764,7 +764,7 @@ Select * Into My_Department from AdventureWorksDB.HumanResources.Department;
 Select * Into My_EmployeePayHistory6_1 from AdventureWorksDB.HumanResources.EmployeePayHistory;
 Select * Into My_EmployeePayHistory6_2 from AdventureWorksDB.HumanResources.EmployeePayHistory;
 
-
+--Creating Cursor and using if and else statements
 Declare @EmployeeID Int
 Declare RateCursor Cursor for (select distinct BusinessEntityId from My_EmployeePayHistory6_1)
 Open RateCursor
