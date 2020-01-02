@@ -1,353 +1,6 @@
-Stored Procedures:
-EXEC sp_BV01_sp_BV01_Security 'salesmgr';
-EXEC sp_BV01_sp_BV01_Security 'salesrep';
-
-CREATE PROCEDURE sp_BV02_Security @username varchar(20)
-as
-begin
-	EXEC ('GRANT SELECT ON BV02_NB_CUSTOMERS_IN_US_BY_STATE ' + @username )
-  EXEC ('GRANT UPDATE ON BV02_NB_CUSTOMERS_IN_US_BY_STATE ' + @username )
-end
-
-EXEC sp_BV02_sp_BV02_Security 'salesmgr';
-EXEC sp_BV02_sp_BV02_Security 'salesrep';
-
-CREATE PROCEDURE sp_BV03_Security @username varchar(20)
-as
-begin
-	EXEC ('GRANT SELECT ON BV03_SALES_BY_STATE_US_2015 ' + @username )
-  EXEC ('GRANT UPDATE ON BV03_SALES_BY_STATE_US_2015 ' + @username )
-end
-
-EXEC sp_BV03_sp_BV03_Security 'salesmgr';
-EXEC sp_BV03_sp_BV03_Security 'salesrep';
-
-CREATE PROCEDURE sp_BV04_Security @username varchar(20)
-as
-begin
-	EXEC ('GRANT SELECT ON BV04_YEARLY_GROWTH_BY_STATE_PROVINCE ' + @username )
-  EXEC ('GRANT UPDATE ON BV04_YEARLY_GROWTH_BY_STATE_PROVINCE ' + @username )
-end
-
-EXEC sp_BV04_sp_BV04_Security 'salesmgr';
-EXEC sp_BV04_sp_BV04_Security 'accountant';
-
-CREATE PROCEDURE sp_BV05_Security @username varchar(20)
-as
-begin
-	EXEC ('GRANT SELECT ON BV05_AVG_DISCOUNT_CLASS ' + @username )
-  EXEC ('GRANT UPDATE ON BV05_AVG_DISCOUNT_CLASS ' + @username )
-end
-
-EXEC sp_BV05_sp_BV05_Security 'salesmgr';
-EXEC sp_BV05_sp_BV05_Security 'salesrep';
-EXEC sp_BV05_sp_BV05_Security 'accountant';
-
-CREATE PROCEDURE sp_BV06_Security @username varchar(20)
-as
-begin
-	EXEC ('GRANT SELECT ON BV06_DISCOUNT_RATE_2015 ' + @username )
-  EXEC ('GRANT UPDATE ON BV06_DISCOUNT_RATE_2015 ' + @username )
-end
-
-EXEC sp_BV06_sp_BV06_Security 'salesmgr';
-EXEC sp_BV06_sp_BV06_Security 'salesrep';
-
-CREATE PROCEDURE sp_BV07_Security @username varchar(20)
-as
-begin
-	EXEC ('GRANT SELECT ON BV07_DAYS_TO_PAY ' + @username )
-  EXEC ('GRANT UPDATE ON BV07_DAYS_TO_PAY ' + @username )
-end
-
-EXEC sp_BV07_sp_BV07_Security 'salesmgr';
-EXEC sp_BV07_sp_BV07_Security 'accountant';
-
-CREATE PROCEDURE sp_BV08_Security @username varchar(20)
-as
-begin
-	EXEC ('GRANT SELECT ON BV08_DAYS_TO_SHIP ' + @username )
-  EXEC ('GRANT UPDATE ON BV08_DAYS_TO_SHIP ' + @username )
-end
-
-EXEC sp_BV08_sp_BV08_Security 'salesmgr';
-EXEC sp_BV08_sp_BV08_Security 'inventorymgr';
-
--- STP01 : Delete Product
-CREATE PROCEDURE stp01_delete_product
-(
-   @productId INT
-)
-AS
-BEGIN
- BEGIN TRY
-    BEGIN TRANSACTION;
-		 -- try deleting the product
-		 DELETE FROM Product
-		 WHERE PROD_ID = @productId
-
-	 -- if DELETE succeeds, commit the transaction
-    COMMIT TRANSACTION;
-	    RAISERROR('The product has been deleted!', 16, 1)
- END TRY
-BEGIN CATCH
-        IF @@TRANCOUNT > 0
-            ROLLBACK TRANSACTION;
-        RAISERROR('The product has not been deleted!', 16, 1)
-END CATCH
-END;
+DDL Sample:
+USE G3
 GO
-
-/** Execute Stored Procedure **/
-EXEC stp01_delete_product
-      @productId =10
--- DROP PROCEDURE stp01_delete_product;
-
-
-
--- STP02: Update customer
-
-
--- STP02 : Update customer phone number and email
-CREATE PROCEDURE stp02_update_customer_firstname_lastname_phonenumber_email_yearofbirth
-(
-@customerId INT,
-@firstname varchar(255),
-@lastname varchar(255),
-@phoneNumber varchar(255),
-@email varchar(255),
-@yearofbirth int
-)
-AS
-BEGIN
- BEGIN TRY
-     BEGIN TRANSACTION;
-		 -- try deleting the product
-		 UPDATE Customer
-		 SET
-		 FIRST_NAME = @firstname,
-		 LAST_NAME = @lastname,
-		 PHONE_NUMBER = @phoneNumber,
-		 EMAIL = @email,
-		 YEAR_OF_BIRTH = @yearofbirth
-		 WHERE CUST_ID = @customerId
-
-	 -- if update succeeds, commit the transaction
-	 	     Raiserror('The customer data have been updated!',16,1)
-     COMMIT TRANSACTION;
- END TRY
-
-BEGIN CATCH
-        IF @@TRANCOUNT > 0
-			     Raiserror('The customer data have NOT been updated!',16,1)
-            ROLLBACK TRANSACTION;
-
-END CATCH
-
-END;
-GO
-
-/** Execute Stored Procedure **/
-EXEC stp02_update_customer_firstname_lastname_phonenumber_email_yearofbirth
-   @customerId = 1,
-   @firstname = 'testFirstName',
-   @lastname = 'testLastName',
-   @phoneNumber = '123-321-1234',
-   @email = 'test@company.com',
-   @yearofbirth = '2020';
-
-
-INDEXES:
-
--- Top 10 Customers with Amount Sold--
-Create Index IDX_TRANSINFO_AMOUNT_SOLD on Transinfo (AMOUNT_SOLD)
-Create NONCLUSTERED Index NCIDX__TRANSINFO_AMOUNT_SOLD on Transinfo (AMOUNT_SOLD)
---  Active customers in California
-Create Index IDX_CUSTOMER_CUST_ID on Customer (CUST_ID)
-Create NONCLUSTERED Index NCIDX_CUSTOMER_CUST_ID on Customer (CUST_ID)
--- Nb cities per state in the US
-Create Index IDX_CITY_STATE_PROVINCE on City (STATE_PROVINCE)
-Create NONCLUSTERED Index NCIDX_CITY_STATE_PROVINCE on City (STATE_PROVINCE)
--- Nb of sales per state in the USA in 2015
-Create Index IDX_TRANSINFO_SALESTRANS_ID on Transinfo (SALESTRANS_ID)
-Create NONCLUSTERED Index NCIDX_TRANSINFO_SALESTRANS_ID on Transinfo (SALESTRANS_ID)
--- Yearly growth per state of province
-Create Index SALE_TRANSINFO_DATE_AMOUNT_SOLD on Transinfo (SALE_DATE, AMOUNT_SOLD)
-Create NONCLUSTERED Index NC_TRANSINFO_SALE_DATE_AMOUNT_SOLD on Transinfo (SALE_DATE, AMOUNT_SOLD)
--- avgdiscount per product
-Create Index IDX_PRODUCT_PROD_ID on Product (PROD_ID)
-Create NONCLUSTERED Index NCIDXPRODUCT__PROD_ID on Product (PROD_ID)
--- classified avg discounts in 3 groups per product
-Create Index QUANTITY_SOLD_AMOUNT_SOLD on Transinfo (QUANTITY_SOLD, AMOUNT_SOLD)
-Create Index IDX_TRANSINFO_PROD_ID on Transinfo (PROD_ID)
--- QUAN discount rate in 2015
-Create Index IDX_PRODUCT_PROD_ID on Product (PROD_ID)
-Create NONCLUSTERED Index NCIDX_PRODUCT_PROD_ID on Product (PROD_ID)
--- DaysTakenToPay
-Create Index SALE_DATE_PAYMENT_DATE on Transinfo (SALE_DATE, PAYMENT_DATE)
-Create Index IDX_TRANSINFO_PROD_ID on Transinfo (PROD_ID)
--- days taken to ship sale
-Create Index SALE_DATE_SHIPPING_DATE on Transinfo (SALE_DATE, SHIPPING_DATE)
-Create Index IDX_TRANSINFO_SALESTRANS_ID on Transinfo (SALESTRANS_ID)
-*/
-
-Business Views and Indexes:
--- BV01 Top 10 Customers with Amount Sold => Salesmgr, Salesrep
-CREATE VIEW BV01_TOP10CUSTOMERS_AMOUNTSOLD AS
-SELECT TOP 10 C.FIRST_NAME, C.LAST_NAME, Sum(AMOUNT_SOLD) AS TotalAmountSold
-FROM Customer as c
-left join Transinfo tr
-ON c.CUST_ID = tr.CUST_ID
-GROUP BY c.LAST_NAME, c.FIRST_NAME
-
--- INDEX
-CREATE INDEX IX_Transinfo_STID_AS ON Transinfo (SALESTRANS_ID, AMOUNT_SOLD);
-DROP INDEX IX_Transinfo_STID_AS ON Transinfo;
-
--- BV02 Nb of customers in each US state => Salesmgr, Salerep
-CREATE VIEW BV02_NB_CUSTOMERS_IN_US_BY_STATE AS
-SELECT distinct STATE_PROVINCE, count(c.CUST_ID) as NbOfCustomers
-FROM Transinfo tr
-join Customer c
-	on c.CUST_ID = tr.CUST_ID
-join Customer_Address ca
-	on ca.CUST_ID = c.CUST_ID
-join Address a
-	on a.ADDRESS_ID = ca.ADDRESS_ID
-join city ci
-	on ci.POSTAL_CODE = a.POSTAL_CODE
-join Country ct
-	on ct.COUNTRY_ID = ci.COUNTRY_ID
-WHERE ct.COUNTRY = 'United States of America'
-GROUP BY COUNTRY, STATE_PROVINCE
-
--- INDEX
-CREATE INDEX IX_City_PC_SP ON City (POSTAL_CODE, STATE_PROVINCE);
-DROP INDEX IX_City_PC_SP ON City;
-
--- BV03 Nb of sales per state in the USA in 2015
-CREATE VIEW BV03_SALES_BY_STATE_US_2015 AS
-SELECT distinct ci.STATE_PROVINCE, YEAR(SALE_DATE) as YearOfSale, count(SALESTRANS_ID) as TotalNbSales
-FROM Transinfo as tr
-left join Customer_Address ca
-ON ca.CUST_ID = tr.CUST_ID
-left join City ci
-ON ci.POSTAL_CODE = ca.ADDRESS_ID
-join Country ct
-	on ct.COUNTRY_ID = ci.COUNTRY_ID
-WHERE ct.COUNTRY = 'United States of America'
-AND YEAR(SALE_DATE) = 2015
-GROUP BY STATE_PROVINCE, YEAR(SALE_DATE)
-
---INDEX
-CREATE INDEX IX_Transinfo_STID_YOS ON Transinfo (SALESTRANS_ID, SALE_DATE);
-DROP INDEX IX_Transinfo_STID_YOS ON Transinfo;
-
-CREATE INDEX IX_City_PC_SP ON City (POSTAL_CODE, STATE_PROVINCE);
-DROP INDEX IX_City_PC_SP ON City;
-
-
--- BV04 Yearly growth per state of province => Salesmgr, Accountant
-CREATE VIEW BV04_YEARLY_GROWTH_BY_STATE_PROVINCE AS
-	WITH query
-		AS (SELECT STATE_PROVINCE, YEAR(SALE_DATE) AS YEAR, SUM(AMOUNT_SOLD) AS SALES
-				FROM Transinfo tr
-				left join Customer_Address ca
-					ON ca.CUST_ID = tr.CUST_ID
-				left join City ci
-					ON ci.POSTAL_CODE = ca.ADDRESS_ID
-				WHERE STATE_PROVINCE IS NOT NULL
-				GROUP BY STATE_PROVINCE, YEAR(SALE_DATE)
-				)
-	SELECT c1.*,
-						CASE
-							WHEN c2.YEAR IS NULL THEN 'Missing data previous year'
-							WHEN c2.YEAR IS NOT NULL THEN FORMAT(CONVERT(DECIMAL(10, 2), (c1.SALES - c2.SALES)) / CONVERT(DECIMAL(10, 2), c2.SALES), 'p')
-						END
-						AS "YEARLY GROWTH"
-	FROM query c1
-	LEFT JOIN query c2
-	ON c1.STATE_PROVINCE = c2.STATE_PROVINCE
-	AND c2.YEAR = c1.YEAR - 1
-
--- INDEX
-CREATE INDEX IX_Transinfo_STID_YOS ON Transinfo (SALESTRANS_ID, SALE_DATE);
-DROP INDEX IX_Transinfo_STID_YOS ON Transinfo;
-
-CREATE INDEX IX_Transinfo_STID_AS_QS ON Transinfo (SALESTRANS_ID, AMOUNT_SOLD, QUANTITY_SOLD);
-DROP INDEX IX_Transinfo_STID_AS_QS ON Transinfo;
-
-CREATE INDEX IX_City_PC_SP ON City (POSTAL_CODE, STATE_PROVINCE);
-DROP INDEX IX_City_PC_SP ON City;
-
-
--- BV05 QUAN classified avg discounts in 3 groups per product
-CREATE VIEW BV05_AVG_DISCOUNT_CLASS AS
-with cte as (
-    select pr.PROD_ID, pr.NAME, CAST(ROUND(avg(pr.LIST_PRICE -(tr.AMOUNT_SOLD/tr.QUANTITY_SOLD)), 2) AS DECIMAL(19,2)) as AvgDiscount
-    from Transinfo tr
-	left join Product pr
-	on tr.PROD_ID = pr.PROD_ID
---    where tr.SALE_DATE between '2012-01-01' and '2012-12-31'
-	group by pr.PROD_ID, pr.NAME
-)
-select cte.PROD_ID, cte.AvgDiscount,
-    case when AvgDiscount between 0 and 100 then 'small avg discount'
-         when AvgDiscount between 100 and 200 then 'medium avg discount'
-		 when AvgDiscount > 200 then 'big avg discount'
-		 end
-    as [Group]
-from cte
-
--- INDEX
-CREATE INDEX IX_Product_PID_N ON Product (PROD_ID, NAME, LIST_PRICE)
-DROP INDEX IX_Product_PID_N ON Product;
-
-CREATE INDEX IX_Transinfo_STID_AS_QS ON Transinfo (SALESTRANS_ID, AMOUNT_SOLD, QUANTITY_SOLD);
-DROP INDEX IX_Transinfo_STID_AS_QS ON Transinfo;
-
--- BV06 QUAN discount rate in 2015
-CREATE VIEW BV06_DISCOUNT_RATE_2015 AS
-SELECT DISTINCT P.PROD_ID, P.NAME, CAST(ROUND(((P.LIST_PRICE - TR.AMOUNT_SOLD/TR.QUANTITY_SOLD)*100/P.LIST_PRICE), 2) AS DECIMAL(19,2)) AS DiscountRate, TR.PROMO_ID
-FROM Product P
-JOIN Transinfo TR
-ON P.PROD_ID = TR.PROD_ID
-WHERE YEAR(TR.SALE_DATE) > 2014;
-
--- INDEX
-CREATE INDEX IX_Product_PID_N ON Product (PROD_ID, NAME, LIST_PRICE)
-DROP INDEX IX_Product_PID_N ON Product;
-
-CREATE INDEX IX_Transinfo_STID_AS_QS ON Transinfo (SALESTRANS_ID, AMOUNT_SOLD, QUANTITY_SOLD);
-DROP INDEX IX_Transinfo_STID_AS_QS ON Transinfo;
-
-
--- BV07 QUAN DaysTakenToPay, salesmgr, salesrep
-CREATE VIEW BV07_DAYS_TO_PAY AS
-select distinct DATEDIFF(day, SALE_DATE, PAYMENT_DATE) as DaysTakenToPay, Sale_DATE, PAYMENT_DATE, C.FIRST_NAME, C.LAST_NAME, AMOUNT_SOLD, SALESTRANS_ID
-from Transinfo as TR
-left join Customer C
-on TR.CUST_ID = C.CUST_ID
-GROUP BY FIRST_NAME, LAST_NAME, PAYMENT_DATE, SALE_DATE, AMOUNT_SOLD, SALESTRANS_ID;
-
--- INDEX
-CREATE INDEX IX_Transinfo_STID_YOS ON Transinfo (SALESTRANS_ID, SALE_DATE);
-DROP INDEX IX_Transinfo_STID_YOS ON Transinfo;
-
-CREATE INDEX IX_Transinfo_STID_AS_QS ON Transinfo (SALESTRANS_ID, AMOUNT_SOLD, QUANTITY_SOLD);
-DROP INDEX IX_Transinfo_STID_AS_QS ON Transinfo;
-
--- BV08 QUAN days taken to ship sale, inventorymgr, salesmgr
-CREATE VIEW BV08_DAYS_TO_SHIP AS
-select DATEDIFF(day, SALE_DATE, SHIPPING_DATE) as DaystoShip, Sale_DATE, SHIPPING_DATE, SALESTRANS_ID
-from Transinfo
-
--- INDEX
-CREATE INDEX IX_Transinfo_STID_YOS ON Transinfo (SALESTRANS_ID, SALE_DATE);
-DROP INDEX IX_Transinfo_STID_YOS ON Transinfo;
-
-DDL:
-
 
 -- ***CREATE Customer***
     /* Marital Status */
@@ -596,4 +249,426 @@ DDL:
             ON UPDATE CASCADE ON DELETE CASCADE,
         CONSTRAINT FK_Product_Supplier_PROD_ID FOREIGN KEY (PROD_ID) REFERENCES Product (PROD_ID)
             ON UPDATE CASCADE ON DELETE CASCADE
-    )
+	    
+	    
+Sample of Views and Index:
+
+-- BV01 Top 10 Customers with Amount Sold => Salesmgr, Salesrep
+CREATE VIEW BV01_TOP10CUSTOMERS_AMOUNTSOLD AS
+SELECT TOP 10 C.FIRST_NAME, C.LAST_NAME, Sum(AMOUNT_SOLD) AS TotalAmountSold
+FROM Customer as c
+left join Transinfo tr 
+ON c.CUST_ID = tr.CUST_ID
+GROUP BY c.LAST_NAME, c.FIRST_NAME
+
+-- INDEX
+CREATE INDEX IX_Transinfo_CID_AS_QS ON Transinfo (CUST_ID, AMOUNT_SOLD, QUANTITY_SOLD);
+DROP INDEX IX_Transinfo_CID_AS_QS ON Transinfo;
+
+-- BV02 Nb of customers in each US state => Salesmgr, Salerep
+CREATE VIEW BV02_NB_CUSTOMERS_IN_US_BY_STATE AS
+SELECT distinct STATE_PROVINCE, count(c.CUST_ID) as NbOfCustomers
+FROM Transinfo tr
+join Customer c
+	on c.CUST_ID = tr.CUST_ID
+join Customer_Address ca
+	on ca.CUST_ID = c.CUST_ID
+join Address a 
+	on a.ADDRESS_ID = ca.ADDRESS_ID
+join city ci
+	on ci.POSTAL_CODE = a.POSTAL_CODE
+join Country ct
+	on ct.COUNTRY_ID = ci.COUNTRY_ID
+WHERE ct.COUNTRY = 'United States of America'
+GROUP BY COUNTRY, STATE_PROVINCE
+
+-- INDEX
+CREATE INDEX IX_City_C_SP ON City (City, STATE_PROVINCE);
+DROP INDEX IX_City_C_SP ON City;
+
+-- BV03 Nb of sales per state in the USA in 2015
+CREATE VIEW BV03_SALES_BY_STATE_US_2015 AS
+SELECT distinct ci.STATE_PROVINCE, YEAR(SALE_DATE) as YearOfSale, count(SALESTRANS_ID) as TotalNbSales
+FROM Transinfo as tr
+left join Customer_Address ca
+ON ca.CUST_ID = tr.CUST_ID
+left join City ci
+ON ci.POSTAL_CODE = ca.ADDRESS_ID
+join Country ct
+	on ct.COUNTRY_ID = ci.COUNTRY_ID
+WHERE ct.COUNTRY = 'United States of America'
+AND YEAR(SALE_DATE) = 2015
+GROUP BY STATE_PROVINCE, YEAR(SALE_DATE)
+
+--INDEX
+CREATE INDEX IX_Transinfo_CID_SD ON Transinfo (CUST_ID, SALE_DATE);
+DROP INDEX IX_Transinfo_CID_SD ON Transinfo;
+
+
+
+-- BV04 Yearly growth per state of province => Salesmgr, Accountant
+CREATE VIEW BV04_YEARLY_GROWTH_BY_STATE_PROVINCE AS
+	WITH query 
+		AS (SELECT STATE_PROVINCE, YEAR(SALE_DATE) AS YEAR, SUM(AMOUNT_SOLD) AS SALES
+				FROM Transinfo tr
+				left join Customer_Address ca
+					ON ca.CUST_ID = tr.CUST_ID
+				left join City ci
+					ON ci.POSTAL_CODE = ca.ADDRESS_ID
+				WHERE STATE_PROVINCE IS NOT NULL
+				GROUP BY STATE_PROVINCE, YEAR(SALE_DATE)
+				)
+	SELECT c1.*, 		
+						CASE 
+							WHEN c2.YEAR IS NULL THEN 'Missing data previous year'
+							WHEN c2.YEAR IS NOT NULL THEN FORMAT(CONVERT(DECIMAL(10, 2), (c1.SALES - c2.SALES)) / CONVERT(DECIMAL(10, 2), c2.SALES), 'p')
+						END 
+						AS "YEARLY GROWTH"
+	FROM query c1
+	LEFT JOIN query c2 
+	ON c1.STATE_PROVINCE = c2.STATE_PROVINCE 
+	AND c2.YEAR = c1.YEAR - 1
+
+-- INDEX
+CREATE INDEX IX_Transinfo_CID_AS_QS ON Transinfo (CUST_ID, AMOUNT_SOLD, QUANTITY_SOLD);
+DROP INDEX IX_Transinfo_CID_AS_QS ON Transinfo;
+
+CREATE INDEX IX_City_C_SP ON City (City, STATE_PROVINCE);
+DROP INDEX IX_City_C_SP ON City;
+
+
+-- BV05 QUAN classified avg discounts in 3 groups per product
+CREATE VIEW BV05_AVG_DISCOUNT_CLASS AS
+with cte as (
+    select pr.PROD_ID, pr.NAME, CAST(ROUND(avg(pr.LIST_PRICE -(tr.AMOUNT_SOLD/tr.QUANTITY_SOLD)), 2) AS DECIMAL(19,2)) as AvgDiscount
+    from Transinfo tr
+	left join Product pr
+	on tr.PROD_ID = pr.PROD_ID
+--    where tr.SALE_DATE between '2012-01-01' and '2012-12-31' 
+	group by pr.PROD_ID, pr.NAME
+)
+select cte.PROD_ID, cte.AvgDiscount,
+    case when AvgDiscount between 0 and 100 then 'small avg discount'
+         when AvgDiscount between 100 and 200 then 'medium avg discount'
+		 when AvgDiscount > 200 then 'big avg discount'
+		 end
+    as [Group]
+from cte
+
+-- INDEX
+CREATE INDEX IX_Transinfo_PID_AS_QS ON Transinfo (PROD_ID, AMOUNT_SOLD, QUANTITY_SOLD);
+DROP INDEX IX_Transinfo_PID_AS_QS ON Transinfo;
+
+-- BV06 QUAN discount rate in 2015
+CREATE VIEW BV06_DISCOUNT_RATE_2015 AS
+SELECT DISTINCT P.PROD_ID, P.NAME, CAST(ROUND(((P.LIST_PRICE - TR.AMOUNT_SOLD/TR.QUANTITY_SOLD)*100/P.LIST_PRICE), 2) AS DECIMAL(19,2)) AS DiscountRate, TR.PROMO_ID
+FROM Product P
+JOIN Transinfo TR
+ON P.PROD_ID = TR.PROD_ID
+WHERE YEAR(TR.SALE_DATE) > 2014;
+
+-- INDEX
+CREATE INDEX IX_Transinfo_PID_AS_QS ON Transinfo (PROD_ID, AMOUNT_SOLD, QUANTITY_SOLD);
+DROP INDEX IX_Transinfo_PID_AS_QS ON Transinfo;
+
+
+-- BV07 QUAN DaysTakenToPay, salesmgr, salesrep
+CREATE VIEW BV07_DAYS_TO_PAY AS
+select distinct DATEDIFF(day, SALE_DATE, PAYMENT_DATE) as DaysTakenToPay, Sale_DATE, PAYMENT_DATE, C.FIRST_NAME, C.LAST_NAME, AMOUNT_SOLD, SALESTRANS_ID
+from Transinfo as TR
+left join Customer C 
+on TR.CUST_ID = C.CUST_ID
+GROUP BY FIRST_NAME, LAST_NAME, PAYMENT_DATE, SALE_DATE, AMOUNT_SOLD, SALESTRANS_ID;
+
+-- INDEX
+CREATE INDEX IX_Transinfo_CID_SD ON Transinfo (CUST_ID, SALE_DATE);
+DROP INDEX IX_Transinfo_CID_SD ON Transinfo;
+
+CREATE INDEX IX_Transinfo_CID_AS_QS ON Transinfo (CUST_ID, AMOUNT_SOLD, QUANTITY_SOLD);
+DROP INDEX IX_Transinfo_CID_AS_QS ON Transinfo;
+
+-- BV08 QUAN days taken to ship sale, inventorymgr, salesmgr
+CREATE VIEW BV08_DAYS_TO_SHIP AS
+select DATEDIFF(day, SALE_DATE, SHIPPING_DATE) as DaystoShip, Sale_DATE, SHIPPING_DATE, SALESTRANS_ID 
+from Transinfo
+
+-- INDEX
+CREATE INDEX IX_Transinfo_CID_SD ON Transinfo (CUST_ID, SALE_DATE);
+DROP INDEX IX_Transinfo_CID_SD ON Transinfo;
+
+
+Sample of Stored Procedures:
+CREATE PROCEDURE sp_BV01_Security @username varchar(20)
+as
+begin
+	EXEC ('GRANT SELECT ON BV01_TOP10CUSTOMERS_AMOUNTSOLD TO ' + @username )
+  EXEC ('GRANT UPDATE ON BV01_TOP10CUSTOMERS_AMOUNTSOLD TO ' + @username )
+end
+
+EXEC sp_BV01_Security 'salesmgr';
+EXEC sp_BV01_Security 'salesrep';
+
+
+
+CREATE PROCEDURE sp_BV02_Security @username varchar(20)
+as
+begin
+	EXEC ('GRANT SELECT ON BV02_NB_CUSTOMERS_IN_US_BY_STATE TO ' + @username )
+  EXEC ('GRANT UPDATE ON BV02_NB_CUSTOMERS_IN_US_BY_STATE TO ' + @username )
+end
+
+EXEC sp_BV02_Security 'salesmgr';
+EXEC sp_BV02_Security 'salesrep';
+
+
+
+
+CREATE PROCEDURE sp_BV03_Security @username varchar(20)
+as
+begin
+	EXEC ('GRANT SELECT ON BV03_SALES_BY_STATE_US_2015 TO ' + @username )
+  EXEC ('GRANT UPDATE ON BV03_SALES_BY_STATE_US_2015 TO ' + @username )
+end
+
+EXEC sp_BV03_Security 'salesmgr';
+EXEC sp_BV03_Security 'salesrep';
+
+
+
+
+
+CREATE PROCEDURE sp_BV04_Security @username varchar(20)
+as
+begin
+	EXEC ('GRANT SELECT ON BV04_YEARLY_GROWTH_BY_STATE_PROVINCE TO ' + @username )
+  EXEC ('GRANT UPDATE ON BV04_YEARLY_GROWTH_BY_STATE_PROVINCE TO ' + @username )
+end
+
+EXEC sp_BV04_Security 'salesmgr';
+EXEC sp_BV04_Security 'accountant';
+
+
+
+
+
+CREATE PROCEDURE sp_BV05_Security @username varchar(20)
+as
+begin
+	EXEC ('GRANT SELECT ON BV05_AVG_DISCOUNT_CLASS TO ' + @username )
+  EXEC ('GRANT UPDATE ON BV05_AVG_DISCOUNT_CLASS TO ' + @username )
+end
+
+EXEC sp_BV05_Security 'salesmgr';
+EXEC sp_BV05_Security 'salesrep';
+EXEC sp_BV05_Security 'accountant';
+
+
+
+
+
+CREATE PROCEDURE sp_BV06_Security @username varchar(20)
+as
+begin
+	EXEC ('GRANT SELECT ON BV06_DISCOUNT_RATE_2015 TO ' + @username )
+  EXEC ('GRANT UPDATE ON BV06_DISCOUNT_RATE_2015 TO ' + @username )
+end
+
+EXEC sp_BV06_Security 'salesmgr';
+EXEC sp_BV06_Security 'salesrep';
+
+
+
+
+CREATE PROCEDURE sp_BV07_Security @username varchar(20)
+as
+begin
+	EXEC ('GRANT SELECT ON BV07_DAYS_TO_PAY TO ' + @username )
+  EXEC ('GRANT UPDATE ON BV07_DAYS_TO_PAY TO ' + @username )
+end
+
+EXEC sp_BV07_Security 'salesmgr';
+EXEC sp_BV07_Security 'accountant';
+
+
+
+
+CREATE PROCEDURE sp_BV08_Security @username varchar(20)
+as
+begin
+	EXEC ('GRANT SELECT ON BV08_DAYS_TO_SHIP TO ' + @username )
+  EXEC ('GRANT UPDATE ON BV08_DAYS_TO_SHIP TO ' + @username )
+end
+
+EXEC sp_BV08_Security 'salesmgr';
+EXEC sp_BV08_Security 'inventorymgr';
+
+
+
+------------------------------------------------
+------------------------------------------------
+------------------------------------------------
+
+-- STORED PROCEDURE (UPDATE AND DELETE)
+
+-- STP01 : Delete Product
+CREATE PROCEDURE stp01_delete_product
+(
+   @productId INT
+)
+AS 
+BEGIN 
+ BEGIN TRY
+    BEGIN TRANSACTION;
+		 -- try deleting the product
+		 DELETE FROM Product
+		 WHERE PROD_ID = @productId
+	 
+	 -- if DELETE succeeds, commit the transaction
+    COMMIT TRANSACTION;  
+	    RAISERROR('The product has been deleted!', 16, 1)
+ END TRY
+BEGIN CATCH
+        IF @@TRANCOUNT > 0  
+            ROLLBACK TRANSACTION;
+        RAISERROR('The product has not been deleted!', 16, 1)
+END CATCH 
+END;
+GO
+ 
+/** Execute Stored Procedure **/
+EXEC stp01_delete_product
+      @productId =10
+-- DROP PROCEDURE stp01_delete_product;
+
+
+
+-- STP02: Update customer
+
+
+-- STP02 : Update customer phone number and email
+CREATE PROCEDURE stp02_update_customer_firstname_lastname_phonenumber_email_yearofbirth
+(
+@customerId INT,
+@firstname varchar(255),
+@lastname varchar(255),
+@phoneNumber varchar(255),
+@email varchar(255),
+@yearofbirth int
+)
+AS 
+BEGIN 
+ BEGIN TRY
+     BEGIN TRANSACTION;
+		 -- try deleting the product
+		 UPDATE Customer
+		 SET 
+		 FIRST_NAME = @firstname,
+		 LAST_NAME = @lastname,
+		 PHONE_NUMBER = @phoneNumber, 
+		 EMAIL = @email,
+		 YEAR_OF_BIRTH = @yearofbirth
+		 WHERE CUST_ID = @customerId
+	 
+	 -- if update succeeds, commit the transaction
+	 	     Raiserror('The customer data have been updated!',16,1)
+     COMMIT TRANSACTION;  
+ END TRY
+ 
+BEGIN CATCH
+        IF @@TRANCOUNT > 0  
+			     Raiserror('The customer data have NOT been updated!',16,1)
+            ROLLBACK TRANSACTION;
+
+END CATCH
+    
+END;
+GO
+ 
+/*
+Abigail,
+Kessel, 
+127-379-8954
+kessel@company.com, 
+1946
+*/
+
+/** Execute Stored Procedure **/
+EXEC stp02_update_customer_firstname_lastname_phonenumber_email_yearofbirth
+   @customerId = 1,
+   @firstname = 'testFirstName',
+   @lastname = 'testLastName',
+   @phoneNumber = '123-321-1234',
+   @email = 'test@company.com', 
+   @yearofbirth = '2020';
+
+-- drop procedure stp02_update_customer_firstname_lastname_phonenumber_email_yearofbirth;
+
+
+Sample of other indexes:
+--BV01
+CREATE INDEX IX_Transinfo_CID_AS_QS ON Transinfo (CUST_ID, AMOUNT_SOLD, QUANTITY_SOLD);
+
+--BV03
+CREATE INDEX IX_Transinfo_CID_SD ON Transinfo (CUST_ID, SALE_DATE);
+
+--BV04
+CREATE INDEX IX_Transinfo_CID_AS_QS ON Transinfo (CUST_ID, AMOUNT_SOLD, QUANTITY_SOLD);
+
+--BV05
+CREATE INDEX IX_Transinfo_PID_AS_QS ON Transinfo (PROD_ID, AMOUNT_SOLD, QUANTITY_SOLD);
+
+--BV07
+CREATE INDEX IX_Customer_FN_LN ON Customer (FIRST_NAME, LAST_NAME);
+
+
+CREATE INDEX IX_Transinfo_CID_AS_QS ON Transinfo (CUST_ID, AMOUNT_SOLD, QUANTITY_SOLD);
+CREATE INDEX IX_Transinfo_CID_SD ON Transinfo (CUST_ID, SALE_DATE);
+CREATE INDEX IX_Customer_FN_LN ON Customer (FIRST_NAME, LAST_NAME);
+
+CREATE INDEX IX_Transinfo_STID_AS ON Transinfo (SALESTRANS_ID, AMOUNT_SOLD);
+DROP INDEX IX_Transinfo_STID_AS ON Transinfo;
+
+CREATE INDEX IX_City_PC_SP ON City (POSTAL_CODE, STATE_PROVINCE);
+DROP INDEX IX_City_PC_SP ON City;
+
+CREATE INDEX IX_Transinfo_STID_YOS ON Transinfo (SALESTRANS_ID, SALE_DATE);
+DROP INDEX IX_Transinfo_STID_YOS ON Transinfo;
+
+CREATE INDEX IX_Transinfo_STID_AS_QS ON Transinfo (SALESTRANS_ID, AMOUNT_SOLD, QUANTITY_SOLD);
+DROP INDEX IX_Transinfo_STID_AS_QS ON Transinfo;
+
+CREATE INDEX IX_Product_PID_N ON Product (PROD_ID, NAME, LIST_PRICE)
+DROP INDEX IX_Product_PID_N ON Product;
+
+-- Top 10 Customers with Amount Sold--
+Create Index IDX_TRANSINFO_AMOUNT_SOLD on Transinfo (AMOUNT_SOLD)
+Create NONCLUSTERED Index NCIDX__TRANSINFO_AMOUNT_SOLD on Transinfo (AMOUNT_SOLD)
+--  Active customers in California
+Create Index IDX_CUSTOMER_CUST_ID on Customer (CUST_ID)
+Create NONCLUSTERED Index NCIDX_CUSTOMER_CUST_ID on Customer (CUST_ID)
+-- Nb cities per state in the US
+Create Index IDX_CITY_STATE_PROVINCE on City (STATE_PROVINCE)
+Create NONCLUSTERED Index NCIDX_CITY_STATE_PROVINCE on City (STATE_PROVINCE)
+-- Nb of sales per state in the USA in 2015
+Create Index IDX_TRANSINFO_SALESTRANS_ID on Transinfo (SALESTRANS_ID)
+Create NONCLUSTERED Index NCIDX_TRANSINFO_SALESTRANS_ID on Transinfo (SALESTRANS_ID)
+-- Yearly growth per state of province
+Create Index SALE_TRANSINFO_DATE_AMOUNT_SOLD on Transinfo (SALE_DATE, AMOUNT_SOLD)
+Create NONCLUSTERED Index NC_TRANSINFO_SALE_DATE_AMOUNT_SOLD on Transinfo (SALE_DATE, AMOUNT_SOLD)
+-- avgdiscount per product
+Create Index IDX_PRODUCT_PROD_ID on Product (PROD_ID)
+Create NONCLUSTERED Index NCIDXPRODUCT__PROD_ID on Product (PROD_ID)
+-- classified avg discounts in 3 groups per product
+Create Index QUANTITY_SOLD_AMOUNT_SOLD on Transinfo (QUANTITY_SOLD, AMOUNT_SOLD)
+Create Index IDX_TRANSINFO_PROD_ID on Transinfo (PROD_ID)
+-- QUAN discount rate in 2015
+Create Index IDX_PRODUCT_PROD_ID on Product (PROD_ID)
+Create NONCLUSTERED Index NCIDX_PRODUCT_PROD_ID on Product (PROD_ID)
+-- DaysTakenToPay 
+Create Index SALE_DATE_PAYMENT_DATE on Transinfo (SALE_DATE, PAYMENT_DATE)
+Create Index IDX_TRANSINFO_PROD_ID on Transinfo (PROD_ID)
+-- days taken to ship sale
+Create Index SALE_DATE_SHIPPING_DATE on Transinfo (SALE_DATE, SHIPPING_DATE)
+Create Index IDX_TRANSINFO_SALESTRANS_ID on Transinfo (SALESTRANS_ID)
+
+
