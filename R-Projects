@@ -1,6 +1,12 @@
 Regression Analysis:
 
 library(readxl)
+santaclara <- read_excel("C:/Users/cruel/Desktop/Data Practicum/Santa-Clara-Analysis.xlsx", range = cell_cols("B:C"))
+removena <- na.omit(santaclara) 
+subdivisionlegalcode <- lm(Unique_ID ~ land_use_code, data = removena)
+summary(subdivisionlegalcode)
+
+library(readxl)
 santaclaracitystreetnamenumber <- read_excel("C:/Users/cruel/Desktop/Data Practicum/StreetnameNumberstories.xlsx")
 removena <- na.omit(santaclaracitystreetnamenumber)
 /StreetnameNumberstories <- lm(Id ~ storiesnbr, data = removena)
